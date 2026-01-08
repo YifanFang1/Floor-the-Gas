@@ -55,11 +55,19 @@ public class SimpleDrive : MonoBehaviour
             Vector3 forward = transform.forward;
             float currentForwardSpeed = Vector3.Dot(velocity, forward);
 
+            // Reduce speed and acceleration more when turning
+            float turnAbs = Mathf.Abs(turn);
+            float turnSpeedFactor = Mathf.Lerp(1f, 0.7f, turnAbs); // 1 when straight, 0.7 when full turn
+            float turnAccelFactor = Mathf.Lerp(1f, 0.5f, turnAbs); // 1 when straight, 0.5 when full turn
+
+            // If not moving, set turn to zero
+            float effectiveTurn = (move == 0f) ? 0f : turn;
+
             if (move != 0f)
             {
                 // Accelerate toward target speed
-                float targetSpeed = move * speed;
-                float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
+                float targetSpeed = move * speed * turnSpeedFactor;
+                float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, acceleration * turnAccelFactor * Time.fixedDeltaTime);
                 velocity = forward * newForwardSpeed + transform.up * rb.linearVelocity.y;
             }
             else
@@ -73,9 +81,14 @@ public class SimpleDrive : MonoBehaviour
         // 3. TURN (Physics-based, slows with speed)
         float forwardSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
         float speedFactor = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / speed); // 0 when stopped, 1 at max speed
-        if (speedFactor > 0.01f && Mathf.Abs(turn) > 0f)
+        // Parabolic turn factor: max at mid speed, but never zero at low/high speed
+        float minTurnFactor = 0.35f; // Higher minimum turning
+        float parabola = 1.5f * speedFactor * (1f - speedFactor); // Flatter than 4x
+        float blend = Mathf.Clamp01((speedFactor - 0.15f) / 0.7f); // 0 at 0.15, 1 at 0.85
+        float turnFactor = Mathf.Lerp(minTurnFactor, parabola + minTurnFactor, blend);
+        if (Mathf.Abs(effectiveTurn) > 0f)
         {
-            float turnAmount = turn * turnSpeed * speedFactor * Mathf.Deg2Rad; // turn slows as speed drops
+            float turnAmount = effectiveTurn * turnSpeed * turnFactor * Mathf.Deg2Rad;
             Vector3 angularVelocity = new(0f, turnAmount, 0f);
             rb.angularVelocity = angularVelocity;
         }
