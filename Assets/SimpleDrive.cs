@@ -10,10 +10,10 @@ using UnityEngine.InputSystem;
 public class SimpleDrive : MonoBehaviour
 {
     [SerializeField]
-    private float speed = 30f;
+    private float speed = 50f; // Increased top speed
 
     [SerializeField]
-    private float acceleration = 20f; // How quickly the car reaches top speed
+    private float acceleration = 8f; // Decreased acceleration for slower speed-up
 
         [SerializeField]
         private float deceleration = 10f; // Rolling resistance
