@@ -1,4 +1,3 @@
-
 #nullable enable
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,6 +21,10 @@ public class SimpleDrive : MonoBehaviour
 
     private Rigidbody? rb;
 
+    [Header("Physics Options")]
+    [Tooltip("Allow the car to rotate freely (unfreeze X/Z rotation)?")]
+    public bool allowRotation = false;
+
     [Header("Boost Settings")]
     [SerializeField]
     private float boostSpeed = 120f;
@@ -33,6 +36,15 @@ public class SimpleDrive : MonoBehaviour
     private float boostDeceleration = 12f;
 
     private bool isBoosting = false;
+    private float boostTimer = 0f;
+    private bool isBoostPending = false;
+    private float boostDelayTimer = 0f;
+    [SerializeField]
+    private float boostDelay = 0.5f; // Delay before boost starts
+    [SerializeField]
+    private float boostDuration = 0.7f; // Duration of boost effect in seconds
+    [SerializeField]
+    private float boostInitialMultiplier = 2.5f; // How much faster at the start of boost
 
     private void Awake()
     {
@@ -43,7 +55,14 @@ public class SimpleDrive : MonoBehaviour
             return;
         }
         // SAFETY: If you forgot to freeze rotation in Inspector, we do it here.
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        if (allowRotation)
+        {
+            rb.constraints = RigidbodyConstraints.None;
+        }
+        else
+        {
+            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        }
     }
 
     private void FixedUpdate()
@@ -53,7 +72,9 @@ public class SimpleDrive : MonoBehaviour
 
         float move = 0f;
         float turn = 0f;
-        isBoosting = false;
+        // Only set isBoosting to false if not currently boosting
+        if (boostTimer <= 0f)
+            isBoosting = false;
 
         // 1. READ INPUT (Works with New Input System)
 
@@ -65,10 +86,11 @@ public class SimpleDrive : MonoBehaviour
             if (Keyboard.current.dKey.isPressed) turn = 1f;
             if (Keyboard.current.spaceKey.isPressed)
             {
-                // Only allow boost when moving forward
-                if (move > 0f)
+                // Only allow boost when moving forward and not already boosting or pending
+                if (move > 0f && boostTimer <= 0f && !isBoostPending)
                 {
-                    isBoosting = true;
+                    isBoostPending = true;
+                    boostDelayTimer = boostDelay;
                 }
             }
         }
@@ -81,26 +103,58 @@ public class SimpleDrive : MonoBehaviour
 
         float turnAbs = Mathf.Abs(turn);
         float turnSpeedFactor = Mathf.Lerp(1f, 0.7f, turnAbs); // 1 when straight, 0.7 when full turn
-        float turnAccelFactor = Mathf.Lerp(1f, 0.5f, turnAbs); // 1 when straight, 0.5 when full turn
+        float turnAccelFactor = Mathf.Lerp(1f, 0.85f, turnAbs); // 1 when straight, 0.85 when full turn (less reduction)
 
-        // If not moving, set turn to zero
-        float effectiveTurn = (move == 0f) ? 0f : turn;
+        // Allow turning if the car has any speed, not just when move input is pressed
+        float minSpeedForTurn = 0.5f;
+        float effectiveTurn = (Mathf.Abs(currentForwardSpeed) > minSpeedForTurn) ? turn : 0f;
 
-        if (isBoosting)
+        // Handle boost delay
+        if (isBoostPending)
         {
-            // Boost: accelerate rapidly in a straight line, minimal turning
-            float targetSpeed = boostSpeed;
-            float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, boostAcceleration * Time.fixedDeltaTime);
+            boostDelayTimer -= Time.fixedDeltaTime;
+            if (boostDelayTimer <= 0f)
+            {
+                isBoostPending = false;
+                isBoosting = true;
+                boostTimer = boostDuration;
+            }
+        }
+
+        if (boostTimer > 0f)
+        {
+            // Decaying boost: strong initial jump, then fades
+            float t = 1f - (boostTimer / boostDuration); // 0 at start, 1 at end
+            float decay = Mathf.Lerp(boostInitialMultiplier, 1f, t); // Exponential/linear decay
+            float targetSpeed = boostSpeed * decay;
+            float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, boostAcceleration * decay * Time.fixedDeltaTime);
             velocity = forward * newForwardSpeed + transform.up * rb.linearVelocity.y;
             rb.linearVelocity = velocity;
+            boostTimer -= Time.fixedDeltaTime;
+            if (boostTimer <= 0f)
+            {
+                boostTimer = 0f;
+                isBoosting = false;
+            }
         }
         else if (move != 0f)
         {
-            // Normal acceleration
-            float targetSpeed = move * speed * turnSpeedFactor;
-            float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, acceleration * turnAccelFactor * Time.fixedDeltaTime);
-            velocity = forward * newForwardSpeed + transform.up * rb.linearVelocity.y;
-            rb.linearVelocity = velocity;
+            // If holding back while moving forward, apply strong deceleration
+            if (move < 0f && currentForwardSpeed > 1f)
+            {
+                // Fast slowdown, not instant reversal
+                float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, 0f, (deceleration * 4f) * Time.fixedDeltaTime);
+                velocity = forward * newForwardSpeed + transform.up * rb.linearVelocity.y;
+                rb.linearVelocity = velocity;
+            }
+            else
+            {
+                // Normal acceleration
+                float targetSpeed = move * speed * turnSpeedFactor;
+                float newForwardSpeed = Mathf.MoveTowards(currentForwardSpeed, targetSpeed, acceleration * turnAccelFactor * Time.fixedDeltaTime);
+                velocity = forward * newForwardSpeed + transform.up * rb.linearVelocity.y;
+                rb.linearVelocity = velocity;
+            }
         }
         else
         {
