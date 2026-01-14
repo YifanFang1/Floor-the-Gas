@@ -40,7 +40,7 @@ public class SimpleDrive : MonoBehaviour
     private bool isBoostPending = false;
     private float boostDelayTimer = 0f;
     [SerializeField]
-    private float boostDelay = 0.5f; // Delay before boost starts
+    private float boostDelay = 1.0f; // Delay before boost starts (windup)
     [SerializeField]
     private float boostDuration = 0.7f; // Duration of boost effect in seconds
     [SerializeField]
@@ -84,13 +84,24 @@ public class SimpleDrive : MonoBehaviour
             if (Keyboard.current.sKey.isPressed) move = -1f;
             if (Keyboard.current.aKey.isPressed) turn = -1f;
             if (Keyboard.current.dKey.isPressed) turn = 1f;
+
+            // Hold space to wind up boost, release to cancel
             if (Keyboard.current.spaceKey.isPressed)
             {
-                // Only allow boost when moving forward and not already boosting or pending
+                // Only allow boost windup when moving forward and not already boosting or pending
                 if (move > 0f && boostTimer <= 0f && !isBoostPending)
                 {
                     isBoostPending = true;
                     boostDelayTimer = boostDelay;
+                }
+            }
+            else
+            {
+                // If space is released during windup, cancel boost
+                if (isBoostPending)
+                {
+                    isBoostPending = false;
+                    boostDelayTimer = 0f;
                 }
             }
         }

@@ -17,9 +17,21 @@ public class CarAnimator : MonoBehaviour
     private Rigidbody rb;
     private float currentSquash = 1f;
     private Vector3 initialScale;
+    private Vector3[] wheelInitialScales;
+    private Vector3[] wheelInitialPositions;
     private SimpleDrive drive;
 
-    void Start()
+    void Start() {
+            // Store initial positions for each wheel
+            if (wheels != null)
+            {
+                wheelInitialPositions = new Vector3[wheels.Length];
+                for (int i = 0; i < wheels.Length; i++)
+                {
+                    if (wheels[i] != null)
+                        wheelInitialPositions[i] = wheels[i].localPosition;
+                }
+            }
     {
         rb = GetComponent<Rigidbody>();
         drive = GetComponent<SimpleDrive>();
@@ -27,6 +39,16 @@ public class CarAnimator : MonoBehaviour
         if (visualModel)
         {
             initialScale = visualModel.localScale;
+        }
+        // Store initial scales for each wheel
+        if (wheels != null)
+        {
+            wheelInitialScales = new Vector3[wheels.Length];
+            for (int i = 0; i < wheels.Length; i++)
+            {
+                if (wheels[i] != null)
+                    wheelInitialScales[i] = wheels[i].localScale;
+            }
         }
     }
 
@@ -76,14 +98,32 @@ public class CarAnimator : MonoBehaviour
 
         visualModel.localScale = Vector3.Scale(initialScale, stretchDir);
 
-        // 4. WHEEL SPIN
-        foreach (Transform w in wheels)
+        // 4. WHEEL DISTANCE EXPANSION & SPIN
+        for (int i = 0; i < wheels.Length; i++)
         {
-            if (w) 
+            Transform w = wheels[i];
+            if (w)
             {
+                // Move wheels outward based on stretch
+                if (wheelInitialPositions != null && i < wheelInitialPositions.Length)
+                {
+                    Vector3 offset = wheelInitialPositions[i];
+                    // Expand only along the stretch axis
+                    if (stretchAxis == Axis.X)
+                        offset.x *= s;
+                    else if (stretchAxis == Axis.Y)
+                        offset.y *= s;
+                    else if (stretchAxis == Axis.Z)
+                        offset.z *= s;
+                    w.localPosition = offset;
+                }
+                // Keep wheel scale unchanged
+                if (wheelInitialScales != null && i < wheelInitialScales.Length)
+                    w.localScale = wheelInitialScales[i];
                 // Rotate the WHEEL HOLDERS, not the mesh directly
                 w.Rotate(forwardSpeed * wheelSpinSpeed * Time.deltaTime, 0, 0);
             }
         }
     }
+}
 }

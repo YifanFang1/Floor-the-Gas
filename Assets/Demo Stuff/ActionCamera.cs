@@ -67,7 +67,7 @@ public class ActionCamera : MonoBehaviour
                     float boostDelay = (float)boostDelayField.GetValue(drive);
                     if (isBoostPending && boostDelay > 0f)
                     {
-                        // Ramp up shake from 0 to 1 as timer counts down
+                        // Ramp up shake from 0 to 1 as timer counts down (now 1s windup)
                         preBoostShake = 1f - Mathf.Clamp01(boostDelayTimer / boostDelay);
                     }
                 }
