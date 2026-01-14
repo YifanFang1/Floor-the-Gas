@@ -22,17 +22,16 @@ public class CarAnimator : MonoBehaviour
     private SimpleDrive drive;
 
     void Start() {
-            // Store initial positions for each wheel
-            if (wheels != null)
+        // Store initial positions for each wheel
+        if (wheels != null)
+        {
+            wheelInitialPositions = new Vector3[wheels.Length];
+            for (int i = 0; i < wheels.Length; i++)
             {
-                wheelInitialPositions = new Vector3[wheels.Length];
-                for (int i = 0; i < wheels.Length; i++)
-                {
-                    if (wheels[i] != null)
-                        wheelInitialPositions[i] = wheels[i].localPosition;
-                }
+                if (wheels[i] != null)
+                    wheelInitialPositions[i] = wheels[i].localPosition;
             }
-    {
+        }
         rb = GetComponent<Rigidbody>();
         drive = GetComponent<SimpleDrive>();
         // MEMORIZE: Keep your scale of 100 (or whatever it is)
@@ -121,9 +120,8 @@ public class CarAnimator : MonoBehaviour
                 if (wheelInitialScales != null && i < wheelInitialScales.Length)
                     w.localScale = wheelInitialScales[i];
                 // Rotate the WHEEL HOLDERS, not the mesh directly
-                w.Rotate(forwardSpeed * wheelSpinSpeed * Time.deltaTime, 0, 0);
+                w.Rotate(forwardSpeed * wheelSpinSpeed * Time.deltaTime, 0, 0, Space.Self);
             }
         }
     }
-}
 }

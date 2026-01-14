@@ -492,7 +492,7 @@ MonoBehaviour:
   rotationSpeed: 10
   baseFOV: 60
   maxFOV: 90
-  shakeIntensity: 0.05
+  shakeIntensity: 0.02
   vibrationSpeed: 5
 --- !u!1 &552694880
 GameObject:
@@ -551,7 +551,7 @@ MonoBehaviour:
   acceleration: 20
   deceleration: 10
   turnSpeed: 100
-  boostMultiplier: 2
+  boostMultiplier: 5
   flashEffect: {fileID: 0}
   boostWindupDelay: 1
 --- !u!54 &552694886
