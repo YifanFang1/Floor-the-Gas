@@ -1,4 +1,9 @@
 ﻿<Solution>
+  <Project Path="FishNet.Runtime.csproj" />
+  <Project Path="FishNet.Codegen.Cecil.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="FishNet.Example.csproj" />
+  <Project Path="Unity.FishNet.Codegen.csproj" />
+  <Project Path="FishNet.Generated.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>
