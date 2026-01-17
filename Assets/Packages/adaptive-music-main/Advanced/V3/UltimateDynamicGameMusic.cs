@@ -105,10 +105,13 @@ public class UltimateDynamicGameMusic : MonoBehaviour
 
     public void SetStateWeight(MusicState state, float weight)
     {
-        var entry = musicEntries.FirstOrDefault(e => e.state == state);
-        if (entry != null)
+        for (int i = 0; i < musicEntries.Length; i++)
         {
-            entry.weight = weight;
+            if (musicEntries[i].state == state)
+            {
+                musicEntries[i].weight = weight;
+                break;
+            }
         }
     }
 }

@@ -292,12 +292,12 @@ namespace FishNet.Component.Prediction
             //Update transform and rigidbody.
             _rigidbody.transform.position = _receivedRigidbodyState.Value.Position;
             _rigidbody.transform.rotation = _receivedRigidbodyState.Value.Rotation;
-            _rigidbody.velocity = _receivedRigidbodyState.Value.Velocity;
+            _rigidbody.linearVelocity = _receivedRigidbodyState.Value.Velocity;
             _rigidbody.angularVelocity = _receivedRigidbodyState.Value.AngularVelocity;
             //Set prediction defaults.
             _velocityBaseline = null;
             _angularVelocityBaseline = null;
-            _lastVelocity = _rigidbody.velocity;
+            _lastVelocity = _rigidbody.linearVelocity;
             _lastAngularVelocity = _rigidbody.angularVelocity;
         }
 
@@ -313,12 +313,12 @@ namespace FishNet.Component.Prediction
                 return;
 
             Vector3 result;
-            if (PredictVector3Velocity(ref _velocityBaseline, ref _lastVelocity, _rigidbody.velocity, out result))
-                _rigidbody.velocity = result;
+            if (PredictVector3Velocity(ref _velocityBaseline, ref _lastVelocity, _rigidbody.linearVelocity, out result))
+                _rigidbody.linearVelocity = result;
             if (PredictVector3Velocity(ref _angularVelocityBaseline, ref _lastAngularVelocity, _rigidbody.angularVelocity, out result))
                 _rigidbody.angularVelocity = result;
 
-            _lastVelocity = _rigidbody.velocity;
+            _lastVelocity = _rigidbody.linearVelocity;
             _lastAngularVelocity = _rigidbody.angularVelocity;
         }
 
@@ -332,7 +332,7 @@ namespace FishNet.Component.Prediction
             {
                 Position = _rigidbody.transform.position,
                 Rotation = _rigidbody.transform.rotation,
-                Velocity = _rigidbody.velocity,
+                Velocity = _rigidbody.linearVelocity,
                 AngularVelocity = _rigidbody.angularVelocity
             };
 
@@ -409,12 +409,12 @@ namespace FishNet.Component.Prediction
             //Update transform and rigidbody.
             _rigidbody2d.transform.position = _receivedRigidbody2DState.Value.Position;
             _rigidbody2d.transform.rotation = _receivedRigidbody2DState.Value.Rotation;
-            _rigidbody2d.velocity = _receivedRigidbody2DState.Value.Velocity;
+            _rigidbody2d.linearVelocity = _receivedRigidbody2DState.Value.Velocity;
             _rigidbody2d.angularVelocity = _receivedRigidbody2DState.Value.AngularVelocity;
             //Set prediction defaults.
             _velocityBaseline2D = null;
             _angularVelocityBaseline2D = null;
-            _lastVelocity2D = _rigidbody2d.velocity;
+            _lastVelocity2D = _rigidbody2d.linearVelocity;
             _lastAngularVelocity2D = _rigidbody2d.angularVelocity;
         }
 
@@ -430,13 +430,13 @@ namespace FishNet.Component.Prediction
                 return;
 
             Vector3 v3Result;
-            if (PredictVector3Velocity(ref _velocityBaseline2D, ref _lastVelocity2D, _rigidbody2d.velocity, out v3Result))
-                _rigidbody2d.velocity = v3Result;
+            if (PredictVector3Velocity(ref _velocityBaseline2D, ref _lastVelocity2D, _rigidbody2d.linearVelocity, out v3Result))
+                _rigidbody2d.linearVelocity = v3Result;
             float floatResult;
             if (PredictFloatVelocity(ref _angularVelocityBaseline2D, ref _lastAngularVelocity2D, _rigidbody2d.angularVelocity, out floatResult))
                 _rigidbody2d.angularVelocity = floatResult;
 
-            _lastVelocity2D = _rigidbody2d.velocity;
+            _lastVelocity2D = _rigidbody2d.linearVelocity;
             _lastAngularVelocity2D = _rigidbody2d.angularVelocity;
         }
 
@@ -450,7 +450,7 @@ namespace FishNet.Component.Prediction
             {
                 Position = _rigidbody2d.transform.position,
                 Rotation = _rigidbody2d.transform.rotation,
-                Velocity = _rigidbody2d.velocity,
+                Velocity = _rigidbody2d.linearVelocity,
                 AngularVelocity = _rigidbody2d.angularVelocity
             };
 

@@ -58,8 +58,8 @@ public class GameMusic : MonoBehaviour
         if (music1.enabled)
             music1.Play();
 
-        // Set the volume of Music1 to the MaxVolume value
-        music1.volume = MaxVolume;
+        // Set the volume of Music1 to the maxVolume value
+        music1.volume = maxVolume;
     }
 
     public static void Danger()
@@ -139,18 +139,18 @@ public class GameMusic : MonoBehaviour
     // Set the maximum volume for the music
     public static void SetMaxVolume(float x)
     {
-        maxVolume = x;
-
         if (instance)
         {
+            instance.maxVolume = x;
+
             // Adjust the volume of music1 or music2 based on the game state
-            if (danger)
+            if (instance.danger)
             {
-                instance.music2.volume = maxVolume;
+                instance.music2.volume = instance.maxVolume;
             }
             else
             {
-                instance.music1.volume = maxVolume;
+                instance.music1.volume = instance.maxVolume;
             }
         }
     }

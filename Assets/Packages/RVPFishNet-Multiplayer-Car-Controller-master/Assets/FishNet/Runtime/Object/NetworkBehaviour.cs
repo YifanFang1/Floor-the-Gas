@@ -1,6 +1,9 @@
 ﻿using FishNet.Utility.Constant;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [assembly: InternalsVisibleTo(UtilityConstants.CODEGEN_ASSEMBLY_NAME)]
 namespace FishNet.Object
@@ -115,7 +118,22 @@ namespace FishNet.Object
                     climb = climb.parent;
             }
 
-            _addedNetworkObject = (result != null) ? result : transform.root.gameObject.AddComponent<NetworkObject>();
+            if (result != null)
+            {
+                _addedNetworkObject = result;
+            }
+            else
+            {
+                // Defer AddComponent to avoid SendMessage during OnValidate
+                var root = transform.root.gameObject;
+                EditorApplication.delayCall += () =>
+                {
+                    if (root != null && !root.TryGetComponent<NetworkObject>(out _))
+                    {
+                        _addedNetworkObject = root.AddComponent<NetworkObject>();
+                    }
+                };
+            }
             return _addedNetworkObject;
 #else
             return null;

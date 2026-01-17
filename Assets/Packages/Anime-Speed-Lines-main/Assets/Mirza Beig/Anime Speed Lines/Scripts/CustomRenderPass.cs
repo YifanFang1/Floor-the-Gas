@@ -14,29 +14,24 @@ public class CustomRenderPass : ScriptableRenderPass
     {
         this.settings = settings; 
         renderPassEvent = settings.renderPassEvent;
+        requiresIntermediateTexture = true;
     }
 
-    // This method is called before executing the render pass.
-    // It can be used to configure render targets and their clear state. Also to create temporary render target textures.
-    // When empty this render pass will render to the active camera render target.
-    // You should never call CommandBuffer.SetRenderTarget. Instead call <c>ConfigureTarget</c> and <c>ConfigureClear</c>.
-    // The render pipeline will ensure target setup and clearing happens in a performant manner.
-
+#pragma warning disable CS0672 // Member overrides obsolete member
+#pragma warning disable CS0618 // Type or member is obsolete
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         var descriptor = renderingData.cameraData.cameraTargetDescriptor;
         descriptor.depthBufferBits = 0;
-        RenderingUtils.ReAllocateIfNeeded(ref destination, descriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "_CustomRenderPassTempTarget");
+        RenderingUtils.ReAllocateHandleIfNeeded(ref destination, descriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "_CustomRenderPassTempTarget");
         source = renderingData.cameraData.renderer.cameraColorTargetHandle;
     }
 
-    // Here you can implement the rendering logic.
-    // Use <c>ScriptableRenderContext</c> to issue drawing commands or execute command buffers
-    // https://docs.unity3d.com/ScriptReference/Rendering.ScriptableRenderContext.html
-    // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
-
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
+        if (settings.material == null)
+            return;
+
         CommandBuffer cmd = CommandBufferPool.Get();
 
         Blitter.BlitCameraTexture(cmd, source, destination, settings.material, 0);
@@ -45,12 +40,12 @@ public class CustomRenderPass : ScriptableRenderPass
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
     }
-
-    // Cleanup any allocated resources that were created during the execution of this render pass.
+#pragma warning restore CS0618
+#pragma warning restore CS0672
 
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        // RTHandle cleanup is handled by ReAllocateIfNeeded
+        // RTHandle cleanup is handled by ReAllocateHandleIfNeeded
     }
 
     public void Dispose()

@@ -29,8 +29,8 @@ public class Boss : MonoBehaviour
         // Check if the boss is defeated
         if (currentHealth <= 0)
         {
-            // Call the ForceChill method on the GameMusic script
-            gameMusic.ForceChill();
+            // Call the ForceChill method (static)
+            GameMusic.ForceChill();
 
             // Perform any other necessary actions upon boss defeat
             // e.g., play victory animation, trigger level completion, etc.

@@ -211,7 +211,9 @@ namespace FishNet.Component.Transforming
         [Tooltip("How many ticks to extrapolate.")]
         [Range(0, 1024)]
         [SerializeField]
+#pragma warning disable CS0414 // Field is assigned but never used
         private ushort _extrapolation = 2;
+#pragma warning restore CS0414
         /// <summary>
         /// True to enable teleport threshhold.
         /// </summary>
