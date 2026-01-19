@@ -1,5 +1,6 @@
 using FishNet.Object;
 using FishNet.Object.Prediction; // CRITICAL FOR SMOOTH DRIVING
+using FishNet.Transporting;
 using UnityEngine;
 
 // 1. The Input Data (What keys are we pressing?)
@@ -108,7 +109,7 @@ public class NetCarController : NetworkBehaviour {
                 transform.rotation, 
                 _rb.linearVelocity, 
                 _rb.angularVelocity, 
-                base.TimeManager.GetTick()
+                base.TimeManager.Tick
             );
             Reconcile(rd);
         }
