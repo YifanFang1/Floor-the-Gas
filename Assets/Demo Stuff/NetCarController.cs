@@ -1,6 +1,7 @@
 using FishNet.Object;
 using FishNet.Object.Prediction; // CRITICAL FOR SMOOTH DRIVING
 using FishNet.Transporting;
+using FishNet.Utility.Template;
 using UnityEngine;
 
 // 1. The Input Data (What keys are we pressing?)
@@ -37,7 +38,7 @@ public struct ReconcileData : IReconcileData {
     }
 }
 
-public class NetCarController : NetworkBehaviour {
+public class NetCarController : TickNetworkBehaviour {
     
     [Header("Car Settings")]
     public float acceleration = 20f;
@@ -49,36 +50,32 @@ public class NetCarController : NetworkBehaviour {
         _rb = GetComponent<Rigidbody>();
     }
 
-    // B. Prediction Setup
+    // B. Prediction Setup - Use SetTickCallbacks for Rigidbody prediction
     public override void OnStartNetwork() {
         base.OnStartNetwork();
-        // Tell FishNet to run our physics logic during the Tick
-        if (base.TimeManager != null) {
-            base.TimeManager.OnTick += TimeManager_OnTick;
-            base.TimeManager.OnPostTick += TimeManager_OnPostTick;
-        }
+        // Tell FishNet to run our physics logic during Tick and PostTick
+        SetTickCallbacks(TickCallback.Tick | TickCallback.PostTick);
     }
 
-    public override void OnStopNetwork() {
-        base.OnStopNetwork();
-        if (base.TimeManager != null) {
-            base.TimeManager.OnTick -= TimeManager_OnTick;
-            base.TimeManager.OnPostTick -= TimeManager_OnPostTick;
-        }
+    // C. Gather Inputs and Run Prediction (Client Side)
+    protected override void TimeManager_OnTick() {
+        // Build and run replicate
+        MoveData md = BuildMoveData();
+        Move(md);
+        
+        // Create reconcile data
+        CreateReconcile();
     }
 
-    // C. Gather Inputs (Client Side)
-    private void TimeManager_OnTick() {
-        if (base.IsOwner) {
-            // 1. Read Input
-            MoveData md = new MoveData {
-                Throttle = Input.GetAxis("Vertical"),
-                Turn = Input.GetAxis("Horizontal")
-            };
+    private MoveData BuildMoveData() {
+        // Only the owner needs to build input data
+        if (!base.IsOwner)
+            return default;
 
-            // 2. Send to Server (and run locally)
-            Move(md);
-        }
+        return new MoveData {
+            Throttle = Input.GetAxis("Vertical"),
+            Turn = Input.GetAxis("Horizontal")
+        };
     }
 
     // D. The Actual Movement Logic (Runs on Client AND Server)
@@ -101,18 +98,16 @@ public class NetCarController : NetworkBehaviour {
     }
 
     // E. Server Corrects Client (Anti-Cheat / Sync)
-    private void TimeManager_OnPostTick() {
-        // Only the Server sends corrections
-        if (base.IsServerInitialized) {
-            ReconcileData rd = new ReconcileData(
-                transform.position, 
-                transform.rotation, 
-                _rb.linearVelocity, 
-                _rb.angularVelocity, 
-                base.TimeManager.Tick
-            );
-            Reconcile(rd);
-        }
+    public override void CreateReconcile() {
+        // Both server and client should create reconcile data
+        ReconcileData rd = new ReconcileData(
+            transform.position, 
+            transform.rotation, 
+            _rb.linearVelocity, 
+            _rb.angularVelocity, 
+            base.TimeManager.Tick
+        );
+        Reconcile(rd);
     }
 
     [Reconcile]
