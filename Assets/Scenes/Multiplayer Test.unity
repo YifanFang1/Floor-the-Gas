@@ -226,7 +226,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.25053, y: -0, z: 7.4858}
-  m_LocalScale: {x: 100000, y: -1, z: 100000}
+  m_LocalScale: {x: 100000, y: 1, z: 100000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -495,13 +495,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 665081812}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 211a9f6ec51ddc14f908f5acc0cd0423, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Spawning.PlayerSpawner
-  _playerPrefab: {fileID: 9197822670589500528}
-  _addToDefaultScene: 1
+  _playerPrefab: {fileID: 6750047534565970167, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
+  _addToDefaultScene: 0
   Spawns:
   - {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
 --- !u!114 &665081818
@@ -747,82 +747,6 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
---- !u!1001 &2996431867925755855
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 7.78467
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.75309
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -3.78202
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919074638835233042, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5459574353090010072, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: m_Name
-      value: Car
-      objectReference: {fileID: 0}
-    - target: {fileID: 6750047534565970167, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: SceneId
-      value: 1464852922
-      objectReference: {fileID: 0}
-    - target: {fileID: 6750047534565970167, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-      propertyPath: WasActiveDuringEdit
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
---- !u!114 &9197822670589500528 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6750047534565970167, guid: b5d9d3fc442cc495d8cdbb79f03d1786, type: 3}
-  m_PrefabInstance: {fileID: 2996431867925755855}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -831,6 +755,5 @@ SceneRoots:
   - {fileID: 1963190826}
   - {fileID: 436176973}
   - {fileID: 665081815}
-  - {fileID: 2996431867925755855}
   - {fileID: 468620752}
   - {fileID: 814304149}

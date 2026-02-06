@@ -1,22 +1,21 @@
 using FishNet.Object;
-using FishNet.Object.Prediction; // CRITICAL FOR SMOOTH DRIVING
+using FishNet.Object.Prediction;
 using FishNet.Transporting;
-using FishNet.Utility.Template;
 using UnityEngine;
 
-// 1. The Input Data (What keys are we pressing?)
+// 1. Move Data
 public struct MoveData : IReplicateData {
     public float Throttle;
     public float Turn;
+    public bool Jump;
     private uint _tick;
 
-    // FishNet requirements
     public void Dispose() { }
     public uint GetTick() => _tick;
     public void SetTick(uint value) => _tick = value;
 }
 
-// 2. The Reconcile Data (Where is the car actually?)
+// 2. Reconcile Data
 public struct ReconcileData : IReconcileData {
     public Vector3 Position;
     public Quaternion Rotation;
@@ -28,7 +27,6 @@ public struct ReconcileData : IReconcileData {
     public uint GetTick() => _tick;
     public void SetTick(uint value) => _tick = value;
 
-    // Constructor to easily capture state
     public ReconcileData(Vector3 pos, Quaternion rot, Vector3 vel, Vector3 angVel, uint tick) {
         Position = pos;
         Rotation = rot;
@@ -38,68 +36,68 @@ public struct ReconcileData : IReconcileData {
     }
 }
 
-public class NetCarController : TickNetworkBehaviour {
+// CHANGE: Inherit from NetworkBehaviour, not TickNetworkBehaviour
+public class NetCarController : NetworkBehaviour {
     
     [Header("Car Settings")]
-    public float acceleration = 20f;
-    public float turnSpeed = 5f;
+    public float acceleration = 50f;
+    public float turnSpeed = 100f;
+    public float jumpForce = 10f;
     public Rigidbody _rb;
 
-    // A. Setup
     private void Awake() {
         _rb = GetComponent<Rigidbody>();
+        _rb.centerOfMass = new Vector3(0, -0.9f, 0);
     }
 
-    // B. Prediction Setup - Use SetTickCallbacks for Rigidbody prediction
+    // CHANGE: Subscribe to the Tick event manually
     public override void OnStartNetwork() {
         base.OnStartNetwork();
-        // Tell FishNet to run our physics logic during Tick and PostTick
-        SetTickCallbacks(TickCallback.Tick | TickCallback.PostTick);
+        // Listen to the server tick
+        base.TimeManager.OnTick += TimeManager_OnTick;
     }
 
-    // C. Gather Inputs and Run Prediction (Client Side)
-    protected override void TimeManager_OnTick() {
-        // Build and run replicate
+    // CHANGE: Unsubscribe when object is destroyed to prevent errors
+    public override void OnStopNetwork() {
+        base.OnStopNetwork();
+        if (base.TimeManager != null)
+            base.TimeManager.OnTick -= TimeManager_OnTick;
+    }
+
+    // CHANGE: This is now a normal function we call, not an override
+    private void TimeManager_OnTick() {
         MoveData md = BuildMoveData();
         Move(md);
-        
-        // Create reconcile data
         CreateReconcile();
     }
 
     private MoveData BuildMoveData() {
-        // Only the owner needs to build input data
         if (!base.IsOwner)
             return default;
 
         return new MoveData {
             Throttle = Input.GetAxis("Vertical"),
-            Turn = Input.GetAxis("Horizontal")
+            Turn = Input.GetAxis("Horizontal"),
+            Jump = Input.GetKey(KeyCode.Space)
         };
     }
 
-    // D. The Actual Movement Logic (Runs on Client AND Server)
     [Replicate]
     private void Move(MoveData md, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable) {
-        // Simple Physics Logic
-        // Gas
         if (md.Throttle != 0) {
             _rb.AddForce(transform.forward * md.Throttle * acceleration, ForceMode.Acceleration);
         }
-        
-        // Steering (Only turn if moving, for realism)
-        float speed = Vector3.Dot(_rb.linearVelocity, transform.forward);
-        if (Mathf.Abs(speed) > 1f) {
-            float direction = speed > 0 ? 1 : -1; // Reverse steering when backing up
-            float turnAmount = md.Turn * turnSpeed * direction * Time.fixedDeltaTime;
-            Quaternion turnRotation = Quaternion.Euler(0f, turnAmount, 0f);
-            _rb.MoveRotation(_rb.rotation * turnRotation);
+
+        float turnAmount = md.Turn * turnSpeed * Time.fixedDeltaTime;
+        Quaternion turnRotation = Quaternion.Euler(0f, turnAmount, 0f);
+        _rb.MoveRotation(_rb.rotation * turnRotation);
+
+        if (md.Jump && transform.position.y < 2.0f) {
+            _rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
         }
     }
 
-    // E. Server Corrects Client (Anti-Cheat / Sync)
     public override void CreateReconcile() {
-        // Both server and client should create reconcile data
         ReconcileData rd = new ReconcileData(
             transform.position, 
             transform.rotation, 
@@ -112,7 +110,6 @@ public class NetCarController : TickNetworkBehaviour {
 
     [Reconcile]
     private void Reconcile(ReconcileData rd, Channel channel = Channel.Unreliable) {
-        // Snap the car to the server's truth if it drifted too far
         transform.position = rd.Position;
         transform.rotation = rd.Rotation;
         _rb.linearVelocity = rd.Velocity;
