@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Underside
+  - Enemy
+  - FinishLine
+  - Checkpoint
   layers:
   - Default
   - TransparentFX
@@ -18,10 +21,10 @@ TagManager:
   - 
   - Vehicle
   - Wheel
-  - Ground
+  - Track
   - Ignore Wheel
-  - 
-  - 
+  - Projectile
+  - Pickup
   - 
   - 
   - 
