@@ -113,7 +113,6 @@ MonoBehaviour:
   _chancePerAxes: 0.8
   _rotationChance: 0.33
   _delayBetweenMovements: 0
-  _yOffsetPerInstance: 0
   _randomMovement: 1
   _goalDatas: []
   _moveInUpdate: 0

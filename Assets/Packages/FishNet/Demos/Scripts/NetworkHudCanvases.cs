@@ -130,7 +130,7 @@ namespace FishNet.Example
         {
 #if !ENABLE_INPUT_SYSTEM
             SetEventSystem();
-            BaseInputModule inputModule = FindObjectOfType<BaseInputModule>();
+            BaseInputModule inputModule = FindFirstObjectByType<BaseInputModule>();
             if (inputModule == null)
                 gameObject.AddComponent<StandaloneInputModule>();
 #else
@@ -138,7 +138,7 @@ namespace FishNet.Example
             _clientIndicator.transform.gameObject.SetActive(false);
 #endif
 
-            _networkManager = FindObjectOfType<NetworkManager>();
+            _networkManager = FindFirstObjectByType<NetworkManager>();
             if (_networkManager == null)
             {
                 Debug.LogError("NetworkManager not found, HUD will not function.");
