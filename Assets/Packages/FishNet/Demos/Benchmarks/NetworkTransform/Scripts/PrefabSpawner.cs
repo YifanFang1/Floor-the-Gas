@@ -61,7 +61,7 @@ namespace FishNet.Demo.Benchmarks.NetworkTransforms
             if (_resetBandwidthTime != float.NegativeInfinity && Time.time >= _resetBandwidthTime)
             {
                 _resetBandwidthTime = float.NegativeInfinity;
-                BandwidthDisplay bd = FindFirstObjectByType<BandwidthDisplay>();
+                BandwidthDisplay bd = FindObjectOfType<BandwidthDisplay>();
                 if (bd != null)
                 {
                     bd.ResetAverages();
